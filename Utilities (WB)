@@ -1,0 +1,881 @@
+-- Decompiled with Potassium's decompiler.
+
+local TweenService = game:GetService("TweenService");
+local Players = game:GetService("Players");
+game:GetService("ReplicatedStorage");
+game:GetService("RunService");
+game:GetService("ContentProvider");
+game:GetService("InsertService");
+game:GetService("MarketplaceService");
+local BoatTween = loadstring(game:HttpGet("https://raw.githubusercontent.com/Tariviste2/wehatepastebin/refs/heads/main/boattween"))();
+local Debris = loadstring(game:HttpGet("https://raw.githubusercontent.com/Tariviste2/wehatepastebin/refs/heads/main/Debris"))()
+
+local function lerp(p1, p2, p3) -- Line: 13
+    return p1 + (p2 - p1) * p3;
+end;
+
+local u4 = RaycastParams.new();
+u4.FilterType = Enum.RaycastFilterType.Include;
+u4.FilterDescendantsInstances = { workspace.Map };
+local _ = Players.LocalPlayer;
+local u6 = {
+    RaycastParams = {
+        Map = function() -- Line: 28, Name: Map
+            local v5 = RaycastParams.new();
+            v5.FilterType = Enum.RaycastFilterType.Include;
+            v5.FilterDescendantsInstances = { workspace.Map };
+
+            return v5;
+        end
+    }
+};
+
+function u6.RequestRaycastParams(p7) -- Line: 37
+    -- upvalues: u6 (copy)
+    assert(u6.RaycastParams[p7], "Requested raycast params does not exist - " .. p7);
+
+    return u6.RaycastParams[p7] ~= nil and u6.RaycastParams[p7]() or nil;
+end;
+
+function u6.GetTween(p8, p9) -- Line: 42
+    local info = p8:FindFirstChild("info");
+    local goal = p8:FindFirstChild("goal");
+    local u10 = {};
+
+    if not info then
+        warn("no info");
+
+        return;
+    end;
+
+    if goal then
+        local function createinfo(p11) -- Line: 57
+            -- upvalues: info (copy)
+            local v12 = p11:FindFirstChild("info") and p11:FindFirstChild("info"):GetAttributes() or info:GetAttributes();
+
+            return TweenInfo.new(v12.time, Enum.EasingStyle[v12.style], Enum.EasingDirection[v12.direction], tonumber(v12.Repeat), v12.reverse, (tonumber(v12.delay)));
+        end;
+
+        for _, child in goal:GetChildren() do
+            if not child:IsA("Folder") then
+                return;
+            end;
+
+            local v13 = createinfo(child);
+            local v14;
+
+            if child.Name == "Part" or child.Name == "MeshPart" then
+                v14 = child:GetAttributes();
+            else
+                v14 = false;
+            end;
+
+            if v14 then
+                v14.CFrame = p8.CFrame * v14.CFrame;
+            end;
+
+            local TweenService2 = game.TweenService;
+            local v15 = p8:FindFirstChildOfClass(child.Name) or p8;
+
+            if p8:FindFirstChildOfClass(child.Name) or not v14 then
+                v14 = child:GetAttributes();
+            end;
+
+            local v16 = TweenService2:Create(v15, v13, v14);
+            u10[child.Name .. "Tween"] = v16;
+        end;
+
+        return {
+            tweens = u10,
+
+            play = function() -- Line: 82, Name: play
+                -- upvalues: u10 (copy)
+                for _, v in u10 do
+                    v:Play();
+                end;
+            end
+        };
+    end;
+
+    warn("no goal");
+end;
+
+function u6.Backdrop(p17, p18, u19, p20) -- Line: 90
+    -- upvalues: TweenService (copy)
+    local Lighting = game:GetService("Lighting");
+    TweenService:Create(Lighting, TweenInfo.new(u19 or 1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+        FogEnd = p18,
+        FogStart = p18 - 15
+    }):Play();
+    local u21 = script.Walls:Clone();
+    u21.Parent = workspace.Thrown;
+
+    for _, child in u21:GetChildren() do
+        if child.Name == "wall" then
+            TweenService:Create(child, TweenInfo.new(u19 or 1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Transparency = 0
+            }):Play();
+        end;
+    end;
+
+    if p20 then
+        task.delay(p20, function() -- Line: 103
+            -- upvalues: TweenService (ref), Lighting (copy), u19 (copy), u21 (copy)
+            TweenService:Create(Lighting, TweenInfo.new(u19 or 1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                FogEnd = 999999,
+                FogStart = 999999
+            }):Play();
+
+            for _, child in u21:GetChildren() do
+                if child.Name == "wall" then
+                    TweenService:Create(child, TweenInfo.new(u19 or 1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                        Transparency = 1
+                    }):Play();
+                end;
+            end;
+        end);
+    end;
+end;
+
+function u6.ApplyPropertiesToInstance(p31, u32, u33) -- Line: 146
+    local function ApplyProperties(p34) -- Line: 148
+        -- upvalues: u32 (copy), u33 (copy), ApplyProperties (copy)
+        local v35 = u32[p34];
+
+        if v35 then
+            for i, v in next, v35 do
+                p34[i] = v;
+            end;
+        end;
+
+        if u33 and #p34:GetChildren() > 0 then
+            local v36 = next;
+            local v37, v38 = p34:GetChildren();
+
+            for _, v in v36, v37, v38 do
+                ApplyProperties(v);
+            end;
+        end;
+    end;
+
+    ApplyProperties(p31);
+end;
+
+function u6.BoatTween(...) -- Line: 166
+    -- upvalues: BoatTween (copy)
+    return BoatTween:Create(...);
+end;
+
+function u6.Debris(...) -- Line: 170
+    -- upvalues: Debris (copy)
+    return Debris:AddItem(...);
+end;
+
+function u6.CreateOrgin(p39, p40) -- Line: 175
+    local Position = p39.Position;
+    local v41 = workspace:Raycast(Position, Vector3.new(0, -15, 0), p40);
+
+    if v41 then
+        local _ = v41.Instance;
+    end;
+
+    return Position, p39, v41;
+end;
+
+function u6.ImpactFrames(p42) -- Line: 185
+    -- upvalues: TweenService (copy)
+    local u43 = p42.Number == nil and 0.025 or (p42.Number or 0.025);
+    local u44 = p42.DisableTween or false;
+    local u45 = {};
+
+    for _, child in pairs(p42.Folder:GetChildren()) do
+        u45[tonumber(child.Name)] = child;
+    end;
+
+    local BlurEffect = Instance.new("BlurEffect", workspace.CurrentCamera);
+    BlurEffect.Size = p42.Blur or 0;
+    task.spawn(function() -- Line: 199
+        -- upvalues: u45 (copy), u44 (copy), u43 (copy), TweenService (ref), BlurEffect (copy)
+        for _, v in ipairs(u45) do
+            local CurrentCamera = workspace.CurrentCamera;
+            local v46 = v:Clone();
+            v46.Parent = CurrentCamera;
+
+            if u44 then
+                task.wait(u43);
+                v46:Destroy();
+            else
+                local v47 = TweenService:Create(v46, TweenInfo.new(u43, Enum.EasingStyle.Sine), {
+                    Brightness = 0,
+                    Contrast = 0,
+                    Saturation = 0,
+                    TintColor = Color3.new(1, 1, 1)
+                });
+                v47:Play();
+                v47.Completed:Wait();
+                v46:Destroy();
+            end;
+        end;
+
+        BlurEffect:Destroy();
+    end);
+end;
+
+function u6.PlayAttachment(p48, p49, p50) -- Line: 227
+    -- upvalues: BoatTween (copy), u6 (copy)
+    if p50 and p50.Toggle == "On" then
+        local v51 = next;
+        local v52, v53 = p48:GetDescendants();
+
+        for _, v in v51, v52, v53 do
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = true;
+            end;
+
+            if v:IsA("Beam") then
+                local TextureSpeed = v.TextureSpeed;
+                v.Enabled = true;
+                print("ran");
+                BoatTween:Create(v, {
+                    Time = p50.Time,
+                    Goal = {
+                        Transparency = NumberSequence.new(0, 1)
+                    }
+                }):Play();
+                v.TextureSpeed = 0;
+                BoatTween:Create(v, {
+                    Time = p50.Time,
+                    Goal = {
+                        TextureSpeed = TextureSpeed
+                    }
+                }):Play();
+            end;
+        end;
+
+        return;
+    end;
+
+    if p50 and p50.Toggle == "Off" then
+        u6.FX_OFF(p48, p50.Time, nil, nil);
+
+        return;
+    end;
+
+    for _, descendant in pairs(p48:GetDescendants()) do
+        if descendant:IsA("ParticleEmitter") then
+            local u54 = descendant:GetAttributes();
+            local u55 = u54.EmitDuration or 0;
+            task.delay(u54.EmitDelay, function() -- Line: 267
+                -- upvalues: u55 (copy), descendant (copy), u54 (copy)
+                if u55 > 0 then
+                    task.defer(function() -- Line: 269
+                        -- upvalues: descendant (ref), u55 (ref)
+                        descendant.Enabled = true;
+                        task.wait(u55);
+                        descendant.Enabled = false;
+                    end);
+
+                    return;
+                end;
+
+                descendant:Emit(u54.EmitCount);
+            end);
+        end;
+
+        if descendant:IsA("PointLight") then
+            local v56 = descendant:GetAttributes();
+
+            if v56.EmitterType == true then
+                local v57 = v56.EmitDelay or 0;
+                local u58 = v56.Duration or 0.3;
+                local Brightness = descendant.Brightness;
+                descendant.Brightness = 0;
+                task.delay(v57, function() -- Line: 295
+                    -- upvalues: descendant (copy), u58 (copy), Brightness (copy)
+                    game:GetService("TweenService"):Create(descendant, TweenInfo.new(u58, Enum.EasingStyle.Sine), {
+                        Brightness = Brightness
+                    }):Play();
+                    task.wait(u58);
+                    game:GetService("TweenService"):Create(descendant, TweenInfo.new(u58, Enum.EasingStyle.Sine), {
+                        Brightness = 0
+                    }):Play();
+                end);
+            elseif p49 then
+                game:GetService("TweenService"):Create(descendant, TweenInfo.new(p49, Enum.EasingStyle.Sine), {
+                    Brightness = 0
+                }):Play();
+            end;
+        end;
+
+        if descendant:IsA("Beam") then
+            local u59 = descendant:GetAttributes();
+            local Duration = u59.Duration;
+
+            local function Shut_OFF() -- Line: 312
+                -- upvalues: BoatTween (ref), descendant (copy)
+                game:GetService("TweenService");
+                BoatTween:Create(descendant, {
+                    Time = 0.5,
+                    Goal = {
+                        Transparency = NumberSequence.new(1, 1)
+                    }
+                }):Play();
+            end;
+
+            (function() -- Line: 319, Name: Turn_ON
+                -- upvalues: descendant (copy), u59 (copy)
+                game:GetService("TweenService"):Create(descendant, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Width1 = u59.Width1,
+                    Width0 = u59.Width0
+                }):Play();
+            end)();
+
+            if Duration then
+                task.delay(Duration, function() -- Line: 327
+                    -- upvalues: Shut_OFF (copy)
+                    Shut_OFF();
+                end);
+            end;
+        end;
+    end;
+
+    if p49 then
+        game.Debris:AddItem(p48, p49);
+    end;
+end;
+
+function u6.TweenModelSize(u60, p61, p62) -- Line: 341
+    local v63 = p62.Time or 0.5;
+    local v64 = p62.Style or "Sine";
+    local v65 = p62.Direction or "Out";
+    local v66 = p62.StartSize or u60:GetScale();
+    local NumberValue = Instance.new("NumberValue");
+    NumberValue.Value = v66;
+    local u68 = NumberValue.Changed:Connect(function(p67) -- Line: 352
+        -- upvalues: u60 (copy)
+        u60:ScaleTo(p67);
+    end);
+    local u69 = game:GetService("TweenService"):Create(NumberValue, TweenInfo.new(v63, Enum.EasingStyle[v64], Enum.EasingDirection[v65]), {
+        Value = p61
+    });
+    u69:Play();
+    local u70 = nil;
+    u70 = u69.Completed:Connect(function() -- Line: 359
+        -- upvalues: NumberValue (copy), u70 (ref), u68 (copy)
+        NumberValue:Destroy();
+        u70:Disconnect();
+        u68:Disconnect();
+    end);
+
+    return {
+        Cancel = function() -- Line: 367, Name: Cancel
+            -- upvalues: u69 (copy)
+            u69:Cancel();
+        end,
+
+        Pause = function() -- Line: 371, Name: Pause
+            -- upvalues: u69 (copy)
+            u69:Pause();
+        end,
+
+        Play = function() -- Line: 375, Name: Play
+            -- upvalues: u69 (copy)
+            u69:Play();
+        end,
+
+        tween = u69
+    };
+end;
+
+function u6.TweenNumberSequence(p71, p72, p73, p74, p75, p76, p77, p78) -- Line: 384
+    local v79;
+
+    if p71 then
+        v79 = typeof(p71) == "NumberSequence";
+    else
+        v79 = p71;
+    end;
+
+    assert(v79, "Invalid numberSequence");
+    local v80;
+
+    if p72 then
+        v80 = typeof(p72) == "NumberSequence";
+    else
+        v80 = p72;
+    end;
+
+    assert(v80, "Invalid targetSequence");
+    local v81;
+
+    if p73 then
+        if type(p73) == "number" then
+            v81 = p73 > 0;
+        else
+            v81 = false;
+        end;
+    else
+        v81 = p73;
+    end;
+
+    assert(v81, "Invalid smoothness");
+    local v82;
+
+    if p74 then
+        if type(p74) == "number" then
+            v82 = p74 > 0;
+        else
+            v82 = false;
+        end;
+    else
+        v82 = p74;
+    end;
+
+    assert(v82, "Invalid timeTaken");
+    local v83 = type(p75[p76]) == "userdata";
+    assert(v83, "Invalid objectToUpdate");
+    local v84;
+
+    if p76 then
+        v84 = type(p76) == "string";
+    else
+        v84 = p76;
+    end;
+
+    assert(v84, "Invalid propertyName");
+    local Keypoints = p72.Keypoints;
+    local u85 = {};
+    local u86 = {};
+    local u87 = {};
+
+    for _, v in ipairs(p71.Keypoints) do
+        table.insert(u85, v.Time);
+        table.insert(u86, v.Value);
+        table.insert(u87, v.Envelope);
+    end;
+
+    local function updateNumberSequence(p88) -- Line: 404
+        -- upvalues: u85 (copy), Keypoints (copy), u86 (copy), u87 (copy)
+        local v89 = {};
+
+        for i, v in ipairs(u85) do
+            local v90 = math.abs(v - Keypoints[1].Time);
+            local v91 = 1;
+
+            for i2, v2 in ipairs(Keypoints) do
+                local v92 = math.abs(v - v2.Time);
+
+                if v92 < v90 then
+                    v91 = i2;
+                    v90 = v92;
+                end;
+            end;
+
+            local v93 = u86[i];
+            local v94 = u87[i];
+            table.insert(v89, NumberSequenceKeypoint.new(v, v93 + (Keypoints[v91].Value - v93) * p88, v94 + (Keypoints[v91].Envelope - v94) * p88));
+        end;
+
+        return NumberSequence.new(v89);
+    end;
+
+    for i = 0, 1, 1 / (p73 * p74) do
+        p75[p76] = updateNumberSequence((game.TweenService:GetValue(i, p77, p78)));
+        task.wait(1 / p73);
+    end;
+
+    local v95 = {};
+
+    for _, v in ipairs(u85) do
+        local v96 = math.abs(v - Keypoints[1].Time);
+        local v97 = 1;
+
+        for i, v2 in ipairs(Keypoints) do
+            local v98 = math.abs(v - v2.Time);
+
+            if v98 < v96 then
+                v97 = i;
+                v96 = v98;
+            end;
+        end;
+
+        local Value = Keypoints[v97].Value;
+        local _ = Keypoints[v97].Envelope;
+        table.insert(v95, NumberSequenceKeypoint.new(v, Value, Value));
+    end;
+
+    p75[p76] = NumberSequence.new(v95);
+end;
+
+function u6.Weld(p99, p100, p101) -- Line: 454
+    local Weld = Instance.new("Weld");
+    Weld.Parent = p100;
+    Weld.Part0 = p99;
+    Weld.Part1 = p100;
+    Weld.C0 = p101 or CFrame.new(0, 0, 0);
+
+    return Weld;
+end;
+
+function u6.PlayFlipbook(p102, u103, u104, u105, u106, u107) -- Line: 465
+    local u108 = p102:FindFirstChildOfClass("Decal");
+
+    if u108 and u103 then
+        if u105 then
+            u105(u108);
+        end;
+
+        task.spawn(function() -- Line: 472
+            -- upvalues: u106 (copy), u103 (copy), u108 (copy), u107 (copy), u105 (copy), u104 (copy)
+            for i = 1, u106 do
+                local v109 = u103[i];
+
+                if not v109 then
+                    break;
+                end;
+
+                u108.Texture = v109;
+
+                if u107 == true then
+                    u105(i, u108);
+                end;
+
+                task.wait(u104);
+            end;
+
+            u108.Texture = "";
+        end);
+    end;
+end;
+
+function u6.TweenFlipbook(u110, u111, p112, u113) -- Line: 494
+    -- upvalues: TweenService (copy)
+    local v114 = p112 or TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out);
+    u110:IsA("ImageLabel");
+
+    local function updateTexture(p115) -- Line: 502
+        -- upvalues: u110 (copy), u111 (copy)
+        local v116;
+
+        if u110:IsA("ImageLabel") then
+            v116 = u110;
+        else
+            v116 = u110:FindFirstChildOfClass("Decal");
+        end;
+
+        local v117 = v116 and u111[p115];
+
+        if v117 then
+            if not u110:IsA("ImageLabel") then
+                v116.Texture = v117;
+
+                return;
+            end;
+
+            v116.Image = v117;
+        end;
+    end;
+
+    local NumberValue = Instance.new("NumberValue");
+    NumberValue.Value = 1;
+    local v118 = TweenService:Create(NumberValue, v114, {
+        Value = #u111
+    });
+    v118:Play();
+    local u123 = NumberValue.Changed:Connect(function(p119) -- Line: 527
+        -- upvalues: u110 (copy), u111 (copy)
+        local v120 = math.floor(p119);
+        local v121;
+
+        if u110:IsA("ImageLabel") then
+            v121 = u110;
+        else
+            v121 = u110:FindFirstChildOfClass("Decal");
+        end;
+
+        local v122 = v121 and u111[v120];
+
+        if v122 then
+            if not u110:IsA("ImageLabel") then
+                v121.Texture = v122;
+
+                return;
+            end;
+
+            v121.Image = v122;
+        end;
+    end);
+    local u124 = nil;
+    u124 = v118.Completed:Connect(function() -- Line: 530
+        -- upvalues: NumberValue (copy), u113 (copy), u123 (copy), u124 (ref)
+        NumberValue:Destroy();
+
+        if u113 then
+            u113();
+        end;
+
+        u123:Disconnect();
+        u124:Disconnect();
+    end);
+
+    return v118;
+end;
+
+function u6.GetFXDescendants(p125) -- Line: 541
+    local v126 = {};
+
+    for _, descendant in p125:GetDescendants() do
+        if descendant:IsA("ParticleEmitter") or (descendant:IsA("Beam") or descendant:IsA("Trial")) then
+            table.insert(v126, descendant);
+        end;
+    end;
+
+    return v126;
+end;
+
+function u6.ChangeFXColor(p127, p128) -- Line: 551
+    if p127:IsA("PointLight") or (p127:IsA("SpotLight") or p127:IsA("SurfaceLight")) then
+        p127.Color = p128;
+
+        return;
+    end;
+
+    if p127:IsA("ParticleEmitter") or (p127:IsA("Beam") or p127:IsA("Trial")) then
+        p127.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, p128), ColorSequenceKeypoint.new(1, p128) });
+    end;
+end;
+
+function u6.GroundColor(p129) -- Line: 562
+    if not p129:IsA("BasePart") then
+        p129 = p129.Parent;
+    end;
+
+    local v130 = RaycastParams.new();
+    v130.FilterType = Enum.RaycastFilterType.Include;
+    v130.FilterDescendantsInstances = { workspace.Map };
+    local v131 = workspace:Raycast(p129.Position + Vector3.new(0, 5, 0), Vector3.new(0, -10, 0), v130);
+
+    if not v131 then
+        return;
+    end;
+
+    local v132 = next;
+    local v133, v134 = p129:GetDescendants();
+
+    local function ChangeColor(p135, p136) -- Line: 577
+        p135.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, p136), ColorSequenceKeypoint.new(1, p136) });
+    end;
+
+    for _, v in v132, v133, v134 do
+        if (v.Name == "AfterSmoke" or (v.Name == "Smoke" or v:GetAttribute("FxSmoke"))) and (v:IsA("ParticleEmitter") or (v:IsA("Beam") or (v:IsA("Trail") or (v:IsA("PointLight") or v:IsA("BasePart"))))) then
+            ChangeColor(v, v131.Instance.Color);
+        end;
+    end;
+end;
+
+function u6.AttachVFX(p137, p138) -- Line: 597
+    local Attachment = Instance.new("Attachment");
+    Attachment.Parent = p138;
+
+    for _, v in p137 do
+        if v and v.Parent then
+            v:Clone().Parent = Attachment;
+        end;
+    end;
+
+    return Attachment;
+end;
+
+u6.Distort = script.Highlight;
+
+function u6.SwapParents(p139, p140) -- Line: 611
+    local v141 = {};
+
+    for _, v in p139 do
+        if v and v.Parent then
+            local v142 = v:Clone();
+            table.insert(v141, v142);
+            v142.Parent = p140;
+        end;
+    end;
+
+    return v141;
+end;
+
+function u6.GroupFX(p143) -- Line: 623
+    local Model = Instance.new("Model");
+
+    for _, v in p143 do
+        if v.Parent ~= workspace.Thrown then
+            local v = v:Clone() or v;
+        end;
+
+        if v then
+            v.Parent = Model;
+        end;
+    end;
+
+    return Model;
+end;
+
+function u6.VFXHandle(u144, p145) -- Line: 634
+    -- upvalues: u6 (copy), TweenService (copy)
+    if u144 then
+        local v146 = typeof(u144) == "table";
+
+        if p145.Debris then
+            if v146 then
+                for _, v in u144 do
+                    u6.Debris(v, p145.Debris);
+                end;
+            else
+                u6.Debris(u144, p145.Debris);
+            end;
+        end;
+
+        if p145.Toggle then
+            if typeof(p145.Toggle) == "table" then
+                for _, v in v146 and u144 and u144 or u144:GetDescendants() do
+                    if v:IsA("ParticleEmitter") and table.find(p145.Toggle, "ParticleEmitter") or (v:IsA("Beam") and table.find(p145.Toggle, "Beam") or v:IsA("Trial") and table.find(p145.Toggle, "Trail")) then
+                        v.Enabled = p145.Toggle[1] == "On";
+                    end;
+
+                    if v:IsA("PointLight") or (v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                        TweenService:Create(v, TweenInfo.new(p145.Debris or 1, Enum.EasingStyle.Sine), {
+                            Brightness = 0
+                        }):Play();
+                    end;
+                end;
+            else
+                for _, v in v146 and u144 and u144 or u144:GetDescendants() do
+                    if v:IsA("ParticleEmitter") or (v:IsA("Beam") or v:IsA("Trial")) then
+                        v.Enabled = p145.Toggle == "On";
+                    end;
+
+                    if v:IsA("PointLight") or (v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                        TweenService:Create(v, TweenInfo.new(p145.Debris or 1, Enum.EasingStyle.Sine), {
+                            Brightness = 0
+                        }):Play();
+                    end;
+                end;
+            end;
+        end;
+
+        if typeof(p145.Toggle) ~= "table" and p145.Emit then
+            for _, v in v146 and u144 and u144 or u144:GetDescendants() do
+                local u147 = v:GetAttributes();
+
+                if u147 and not v:GetAttribute("Disabled") then
+                    if v:IsA("ParticleEmitter") then
+                        local u148 = u147.EmitDuration or 0;
+                        task.delay(u147.EmitDelay, function() -- Line: 685
+                            -- upvalues: u148 (copy), v (copy), u147 (copy)
+                            if u148 > 0 then
+                                task.defer(function() -- Line: 687
+                                    -- upvalues: v (ref), u148 (ref)
+                                    v.Enabled = true;
+                                    task.wait(u148);
+                                    v.Enabled = false;
+                                end);
+
+                                return;
+                            end;
+
+                            v:Emit(u147.EmitCount);
+                        end);
+                    end;
+
+                    if v:IsA("PointLight") or (v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                        local _ = v.Brightness;
+                        TweenService:Create(v, TweenInfo.new(u147.TweenTime or 1, Enum.EasingStyle.Sine), {
+                            Brightness = 0
+                        }):Play();
+                    end;
+                end;
+            end;
+        end;
+
+        return {
+            EditColor = function(p149, p150) -- Line: 706, Name: EditColor
+                -- upvalues: u6 (ref), u144 (copy)
+                if p149 == "All" then
+                    p149 = u6.GetFXDescendants(u144) or p149;
+                end;
+
+                if type(p149) == "table" then
+                    for _, v in p149 do
+                        if p150.Color == "GroundColor" then
+                            u6.GroundColor(v);
+                        else
+                            u6.ChangeFXColor(v, p150.Color);
+                        end;
+                    end;
+
+                    return;
+                end;
+
+                if p150.Color == "GroundColor" then
+                    u6.GroundColor(p149);
+
+                    return;
+                end;
+
+                u6.ChangeFXColor(p149, p150.Color);
+            end,
+
+            EditProperties = function(p151, p152) -- Line: 725, Name: EditProperties
+                -- upvalues: u6 (ref), u144 (copy)
+                if p151 == "All" then
+                    p151 = u6.GetFXDescendants(u144) or p151;
+                end;
+
+                if type(p151) == "table" then
+                    for _, v in p151 do
+                        for i, v2 in p152 do
+                            if v and v[i] then
+                                v[i] = v2;
+                            end;
+                        end;
+                    end;
+
+                    return;
+                end;
+
+                for i, v in p152 do
+                    if i and i[i] then
+                        i[i] = v;
+                    end;
+                end;
+            end
+        };
+    end;
+end;
+
+function u6.AlignGroup(p153, p154, p155, p156) -- Line: 749
+    -- upvalues: u4 (copy)
+    if p154 then
+        p153:PivotTo(p154);
+    end;
+
+    local v157 = {};
+
+    for _, descendant in p153:GetDescendants() do
+        if descendant:IsA("BasePart") and descendant:GetAttribute("Grounded") then
+            local v158 = workspace:Raycast(descendant.Position + Vector3.new(0, 2, 0), Vector3.new(-0, -10, -0), p156 or u4);
+
+            if v158 or not p155 then
+                if v158 then
+                    descendant.CFrame = descendant.CFrame - descendant.Position + v158.Position;
+                else
+                    v157[descendant] = v158 ~= nil;
+                end;
+            else
+                descendant:Destroy();
+            end;
+        end;
+    end;
+
+    return p153, v157;
+end;
+
+return u6;
