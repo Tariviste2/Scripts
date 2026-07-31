@@ -1,0 +1,84 @@
+if game:GetService("Players").LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+	return
+end
+local Already = getgenv().invis ~= nil
+getgenv().invis = not getgenv().invis
+
+if Already then
+	return
+end
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid", 5)
+local RootPart = Humanoid.RootPart
+local loop
+
+local Keybind = {
+	Enabled = true,
+	ToggleInvis = {Enabled = true, Key = Enum.KeyCode.X, Function = function() getgenv().invis = not getgenv().invis end},
+}
+
+UserInputService.InputBegan:Connect(function(Key, Processed)
+	if Processed or not Keybind.Enabled then return end
+	for _, v in pairs(Keybind) do
+		if typeof(v) == "table" and Key.KeyCode == v.Key and v.Enabled then
+			v.Function()
+		end
+	end
+end)
+
+function CreateLoop()
+	Humanoid.Died:Connect(function()
+		loop:Disconnect()
+	end)
+
+	loop = RunService.Heartbeat:Connect(function()
+		if Character and RootPart and Humanoid and invis then
+			local oldcf, oldcamoffset, newcf = RootPart.CFrame, Humanoid.CameraOffset, RootPart.CFrame - Vector3.new(0, Humanoid.HipHeight + (RootPart.Size.Y / 2) - 1, 0)
+
+			RootPart.CFrame = newcf * CFrame.Angles(0, 0, math.rad(180))
+
+			Humanoid.CameraOffset = Vector3.new(0, -5, 0)
+
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "http://www.roblox.com/asset/?id=18537363391"
+			local loaded = Humanoid.Animator:LoadAnimation(anim)
+			loaded.Priority = Enum.AnimationPriority.Action4
+			loaded:Play()
+			loaded.TimePosition = 0.77
+			loaded:AdjustSpeed(0)
+
+			RunService.RenderStepped:Wait()
+
+			loaded:Stop()
+
+
+			Humanoid.CameraOffset = oldcamoffset
+			RootPart.CFrame = oldcf
+		end
+	end)
+end
+
+Player.CharacterAdded:Connect(function(Character_)
+	Character = Character_
+
+	local Humanoid_ = Character:WaitForChild("Humanoid")
+	local RootPart_ = Character:WaitForChild("HumanoidRootPart")
+
+	Humanoid = Humanoid_
+	RootPart = RootPart_
+	wait(0.5)
+	if loop	then
+		loop:Disconnect()
+	end
+	CreateLoop()
+end)
+
+if Character then
+	CreateLoop()
+end
