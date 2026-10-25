@@ -686,8 +686,6 @@ function u6.AttachVFX(p137, p138) -- Line: 597
     return Attachment;
 end;
 
-u6.Distort = script.Highlight;
-
 function u6.SwapParents(p139, p140) -- Line: 611
     local v141 = {};
 
